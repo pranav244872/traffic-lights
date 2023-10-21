@@ -2,11 +2,11 @@
   
 ## Required Files
 Download yolo3.weights from <a href="https://pjreddie.com/media/files/yolov3.weights" download>here.</a>  
-Download coco.names <a href="blob:https://github.com/516335cd-7c8e-4628-a551-27b05452edf8" download>here.</a>  
-Download yolo3.cfg <a href="blob:https://github.com/f42f5760-69c3-4e9a-957e-0e1c39d297ca" download>here.</a>  
+Download coco.names from <a href="[https://github.com/pjreddie/darknet/blob/master/data/coco.names](https://github.com/pjreddie/darknet/blob/master/data/coco.names)" download>here.</a>  
+Download yolo3.cfg from <a href="[blob:https://github.com/f42f5760-69c3-4e9a-957e-0e1c39d297ca](https://github.com/pjreddie/darknet/blob/master/cfg/yolov3.cfg)" download>here.</a>  
   
 ## Required Python Modules:
- 1.opencv-python
+ 1.opencv-python  
  2.numpy  
   
 ## How to Run?
