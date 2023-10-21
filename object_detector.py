@@ -30,6 +30,9 @@ class Camera:
         bbox = []
         classIds = []
         confs = []
+        car_count = 0
+        ambulance_count = 0
+
         for output in outputs:
             for det in output:
                 scores = det[5:]
@@ -40,11 +43,10 @@ class Camera:
                     x, y = int((det[0] * wT) - w/2), int((det[1] * hT) - h/2)
                     bbox.append([x, y, w, h])
                     classIds.append(classId)
-                    confs.append(float(confidence)
-        )
+                    confs.append(float(confidence))
 
         indices = cv2.dnn.NMSBoxes(bbox, confs, self.confThreshold, self.nmsThreshold)
-        car_count = 0
+
         for i in indices:
             box = bbox[i]
             x, y, w, h = box[0], box[1], box[2], box[3]
@@ -52,8 +54,12 @@ class Camera:
                 cv2.rectangle(frame, (x, y), (x + w, y + h), (255, 0, 255), 2)
                 cv2.putText(frame, f'Car {int(confs[i]*100)}%', (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 0, 255), 2)
                 car_count += 1
+            elif self.classNames[classIds[i]].lower() == 'truck':
+                cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)  # Green for ambulances
+                cv2.putText(frame, f'Ambulance {int(confs[i]*100)}%', (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
+                ambulance_count += 1
 
-        return frame, car_count
+        return frame, car_count, ambulance_count
 
     def process_video(self):
         cap = cv2.VideoCapture(self.camera_id)
@@ -61,14 +67,14 @@ class Camera:
             success, frame = cap.read()
             if not success:
                 break
-            frame, car_count = self.process_frame(frame)
-            print(f'Camera {self.camera_id}: Number of cars: {car_count}')
+            frame, car_count, ambulance_count = self.process_frame(frame)
+            print(f'Camera {self.camera_id}: Number of cars: {car_count}, Number of ambulances: {ambulance_count}')
             cv2.imshow(f'Camera {self.camera_id}', frame)
             cv2.waitKey(1)
 
 if __name__ == "__main__":
     # Example usage for camera 0
-    camera0 = Camera(0, '/home/pranav/Downloads/Traffic/traffic-lights-bitches/coco.names',
-                     '/home/pranav/Downloads/Traffic/traffic-lights-bitches/yolov3.cfg',
-                     '/home/pranav/Downloads/Traffic/traffic-lights-bitches/yolov3.weights')
+    camera0 = Camera(0, '/home/pranav/Downloads/Traffic/traffic-lights/coco.names',
+                     '/home/pranav/Downloads/Traffic/traffic-lights/yolov3.cfg',
+                     '/home/pranav/Downloads/Traffic/yolov3.weights')
     camera0.process_video()

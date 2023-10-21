@@ -2,11 +2,11 @@
   
 ## Required Files
 Download yolo3.weights from <a href="https://pjreddie.com/media/files/yolov3.weights" download>here.</a>  
-Download coco.names from [here](https://github.com/pjreddie/darknet/blob/master/data/coco.names)   
-Download yolo3.cfg from [here](https://github.com/pjreddie/darknet/blob/master/cfg/yolov3.cfg)
+Download coco.names <a href="blob:https://github.com/516335cd-7c8e-4628-a551-27b05452edf8" download>here.</a>  
+Download yolo3.cfg <a href="blob:https://github.com/f42f5760-69c3-4e9a-957e-0e1c39d297ca" download>here.</a>  
   
 ## Required Python Modules:
- 1.opencv-python  
+ 1.opencv-python
  2.numpy  
   
 ## How to Run?
@@ -22,3 +22,8 @@ Improved upon the written code to count the number of cars from the video and re
   
 ### Ver 1.2.2:
 Improved upon the written code to ONLY count the number of cars from the video and put the code to do so in a class so that it is reusable.  
+  
+### Ver 1.2.3 (21/10/2023):
+Improved upon the written code to count the number of cars and detect ambulances from the given camera and output the number of cars and ambulances in the video in the terminal.  
+  
+### Break to the project until Arduino ESP Camera arrives
