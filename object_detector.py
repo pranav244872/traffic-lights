@@ -2,11 +2,10 @@ import cv2
 import numpy as np
 import requests
 import socket
-
-
+import time
 
 class Camera:
-    def _init_(self, camera_number, stream_url, names_path, config_path, weights_path, conf_threshold=0.5, nms_threshold=0.3):
+    def __init__(self, camera_number, stream_url, names_path, config_path, weights_path, conf_threshold=0.5, nms_threshold=0.3):
         self.stream_url = stream_url
         self.confThreshold = conf_threshold
         self.nmsThreshold = nms_threshold
@@ -66,27 +65,59 @@ class Camera:
             box = bbox[i]
             x, y, w, h = box[0], box[1], box[2], box[3]
             if self.classNames[classIds[i]].lower() == 'car':
-                cv2.rectangle(frame, (x, y), (x + w, y + h), (255, 0, 255), 2)
-                cv2.putText(frame, f'Car {int(confs[i]*100)}%', (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 0, 255), 2)
                 car_count += 1
             elif self.classNames[classIds[i]].lower() == 'truck':
-                cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)  # Green for ambulances
-                cv2.putText(frame, f'Ambulance {int(confs[i]*100)}%', (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
                 ambulance_count += 1
 
-        return frame, car_count, ambulance_count
+        return car_count, ambulance_count
 
     def process_video(self):
-        while True:
+        car_count_list = []
+        ambulance_count_list = []
+        num_frames = 10  # Number of frames to process for averaging
+
+        for _ in range(num_frames):
             frame = self.get_frame_from_stream()
-            frame, car_count, ambulance_count = self.process_frame(frame)
-            print(f'CameraNumber = {self.camera_number},Number of cars: {car_count}, Number of ambulances: {ambulance_count}')
-            cv2.imshow('Stream', frame)
-            if cv2.waitKey(30) & 0xFF == ord('q'):
-                break
+            if frame is not None:
+                car_count, ambulance_count = self.process_frame(frame)
+                car_count_list.append(car_count)
+                ambulance_count_list.append(ambulance_count)
+
+        max_car_count = max(car_count_list)
+        max_ambulance_count = max(ambulance_count_list)
+
+        return max_car_count, max_ambulance_count
+
             
-if _name_ == "_main_":
-    # Example usage for streaming from ESP32
-    esp32_stream_url1 = 'http://192.168.137.30:8080/'  # Modify this URL accordingly
-    camera_esp32 = Camera(1,esp32_stream_url1, 'coco.names', 'yolov3.cfg', 'yolov3.weights')
-    camera_esp32.process_video()
+
+camera1 = Camera(1,'http://192.168.1.2:8080/shot.jpg', '/home/pranav/Desktop/projects/traffic/traffic-lights/coco.names', '/home/pranav/Desktop/projects/traffic/traffic-lights/yolov3.cfg', '/home/pranav/Desktop/projects/traffic/traffic-lights/yolov3.weights')
+camera2 = Camera(2,'http://10.10.10.118:8080/shot.jpg', '/home/pranav/Desktop/projects/traffic/traffic-lights/coco.names', '/home/pranav/Desktop/projects/traffic/traffic-lights/yolov3.cfg', '/home/pranav/Desktop/projects/traffic/traffic-lights/yolov3.weights')
+camera3 = Camera(3,'http://10.10.10.118:8080/shot.jpg', '/home/pranav/Desktop/projects/traffic/traffic-lights/coco.names', '/home/pranav/Desktop/projects/traffic/traffic-lights/yolov3.cfg', '/home/pranav/Desktop/projects/traffic/traffic-lights/yolov3.weights')
+camera4 = Camera(4,'http://10.10.10.118:8080/shot.jpg', '/home/pranav/Desktop/projects/traffic/traffic-lights/coco.names', '/home/pranav/Desktop/projects/traffic/traffic-lights/yolov3.cfg', '/home/pranav/Desktop/projects/traffic/traffic-lights/yolov3.weights')
+
+priority_list_main = []
+while True:
+    priority_list = []
+    cars_per_road = {"A":camera1.process_video()[0],"B":2,"C":3,"D":4}
+    ambulances_per_road = {"A":camera1.process_video()[1],"B":1,"C":0,"D":0}
+    
+    #Sorting dictionaries
+    sorted_cars_per_road = dict(sorted(cars_per_road.items(), key=lambda item: item[1], reverse=True))
+    print(sorted_cars_per_road)
+    sorted_ambulances_per_road = dict(sorted(ambulances_per_road.items(), key=lambda item: item[1], reverse=True))
+    print(sorted_ambulances_per_road)
+    for i in sorted_ambulances_per_road:
+        print(f'i = ', i)
+        if sorted_ambulances_per_road[i] == 0:
+            for j in sorted_cars_per_road:
+                print(f'j =', j)
+                if j in priority_list:
+                    continue
+                else:
+                    priority_list.append(j)
+                    print(priority_list)
+                    continue
+        else:
+            priority_list.append(i)    
+    priority_list_main = priority_list
+    print(priority_list)
