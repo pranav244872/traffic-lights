@@ -1,9 +1,13 @@
 import cv2
 import numpy as np
+import requests
+import socket
+
+
 
 class Camera:
-    def __init__(self, camera_id, names_path, config_path, weights_path, conf_threshold=0.5, nms_threshold=0.3):
-        self.camera_id = camera_id
+    def _init_(self, camera_number, stream_url, names_path, config_path, weights_path, conf_threshold=0.5, nms_threshold=0.3):
+        self.stream_url = stream_url
         self.confThreshold = conf_threshold
         self.nmsThreshold = nms_threshold
 
@@ -17,7 +21,18 @@ class Camera:
         self.net = cv2.dnn.readNetFromDarknet(self.modelConfiguration, self.modelWeights)
         self.net.setPreferableBackend(cv2.dnn.DNN_BACKEND_OPENCV)
         self.net.setPreferableTarget(cv2.dnn.DNN_TARGET_CPU)
+        self.camera_number = camera_number
 
+    def get_frame_from_stream(self):
+        try:    
+            response = requests.get(self.stream_url)
+            frame_array = np.frombuffer(response.content, dtype=np.uint8)
+            frame = cv2.imdecode(frame_array, cv2.IMREAD_COLOR)
+            return frame
+        except Exception as e:
+            print(f"Error getting frame from stream: {e}")
+            return None
+    
     def process_frame(self, frame):
         hT, wT, cT = frame.shape
         blob = cv2.dnn.blobFromImage(frame, 1/255, (320, 320), [0, 0, 0], 1, crop=False)
@@ -62,19 +77,16 @@ class Camera:
         return frame, car_count, ambulance_count
 
     def process_video(self):
-        cap = cv2.VideoCapture(self.camera_id)
         while True:
-            success, frame = cap.read()
-            if not success:
-                break
+            frame = self.get_frame_from_stream()
             frame, car_count, ambulance_count = self.process_frame(frame)
-            print(f'Camera {self.camera_id}: Number of cars: {car_count}, Number of ambulances: {ambulance_count}')
-            cv2.imshow(f'Camera {self.camera_id}', frame)
-            cv2.waitKey(1)
-
-if __name__ == "__main__":
-    # Example usage for camera 0
-    camera0 = Camera(0, '/home/pranav/Downloads/Traffic/traffic-lights/coco.names',
-                     '/home/pranav/Downloads/Traffic/traffic-lights/yolov3.cfg',
-                     '/home/pranav/Downloads/Traffic/yolov3.weights')
-    camera0.process_video()
+            print(f'CameraNumber = {self.camera_number},Number of cars: {car_count}, Number of ambulances: {ambulance_count}')
+            cv2.imshow('Stream', frame)
+            if cv2.waitKey(30) & 0xFF == ord('q'):
+                break
+            
+if _name_ == "_main_":
+    # Example usage for streaming from ESP32
+    esp32_stream_url1 = 'http://192.168.137.30:8080/'  # Modify this URL accordingly
+    camera_esp32 = Camera(1,esp32_stream_url1, 'coco.names', 'yolov3.cfg', 'yolov3.weights')
+    camera_esp32.process_video()

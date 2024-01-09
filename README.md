@@ -27,3 +27,6 @@ Improved upon the written code to ONLY count the number of cars from the video a
 Improved upon the written code to count the number of cars and detect ambulances from the given camera and output the number of cars and ambulances in the video in the terminal.  
   
 ### Break to the project until Arduino ESP Camera arrives
+
+### Ver 1.3.1 (09/01/2024):
+Changed object_detector.py to take video input from local streaming url.
