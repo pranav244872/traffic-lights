@@ -28,5 +28,9 @@ Improved upon the written code to count the number of cars and detect ambulances
   
 ### Break to the project until Arduino ESP Camera arrives
 
-### Ver 1.3.1 (09/01/2024):
-Changed object_detector.py to take video input from local streaming url.
+### Ver 1.2.4 (09/01/2024):
+Changed object_detector.py to take video input from local streaming url.  
+  
+### Ver 1.3.0:  
+Wrote the logic for lane priority.  
+Automatically takes into consideration the number of vehicles, ambulances and allots priority in a list.(currently slow af)  
