@@ -1,8 +1,14 @@
 import cv2
 import numpy as np
 import requests
-import socket
+import serial
 import time
+
+Serialobj=serial.Serial('COM7')
+Serialobj.baudrate=9600
+Serialobj.bytesize=8
+Serialobj.parity='N'
+Serialobj.stopbits=1
 
 class Camera:
     def __init__(self, camera_number, stream_url, names_path, config_path, weights_path, conf_threshold=0.5, nms_threshold=0.3):
@@ -90,16 +96,16 @@ class Camera:
 
             
 
-camera1 = Camera(1,'http://192.168.1.2:8080/shot.jpg', '/home/pranav/Desktop/projects/traffic/traffic-lights/coco.names', '/home/pranav/Desktop/projects/traffic/traffic-lights/yolov3.cfg', '/home/pranav/Desktop/projects/traffic/traffic-lights/yolov3.weights')
-camera2 = Camera(2,'http://10.10.10.118:8080/shot.jpg', '/home/pranav/Desktop/projects/traffic/traffic-lights/coco.names', '/home/pranav/Desktop/projects/traffic/traffic-lights/yolov3.cfg', '/home/pranav/Desktop/projects/traffic/traffic-lights/yolov3.weights')
-camera3 = Camera(3,'http://10.10.10.118:8080/shot.jpg', '/home/pranav/Desktop/projects/traffic/traffic-lights/coco.names', '/home/pranav/Desktop/projects/traffic/traffic-lights/yolov3.cfg', '/home/pranav/Desktop/projects/traffic/traffic-lights/yolov3.weights')
-camera4 = Camera(4,'http://10.10.10.118:8080/shot.jpg', '/home/pranav/Desktop/projects/traffic/traffic-lights/coco.names', '/home/pranav/Desktop/projects/traffic/traffic-lights/yolov3.cfg', '/home/pranav/Desktop/projects/traffic/traffic-lights/yolov3.weights')
+camera1 = Camera(1,'http://192.168.1.9/cam-mid.jpg', 'D:/visha/github/traffic-lights/coco.names', 'D:/visha/github/traffic-lights/yolov3.cfg', 'D:/visha/github/traffic-lights/yolov3.weights')
+camera2 = Camera(2,'http://192.168.220.47:8080/shot.jpg', 'D:/visha/github/traffic-lights/coco.names', 'D:/visha/github/traffic-lights/yolov3.cfg', 'D:/visha/github/traffic-lights/yolov3.weights')
+camera3 = Camera(3,'http://192.168.220.216:8080/shot.jpg', 'D:/visha/github/traffic-lights/coco.names', 'D:/visha/github/traffic-lights/yolov3.cfg', 'D:/visha/github/traffic-lights/yolov3.weights')
+camera4 = Camera(4,'http://10.10.10.118:8080/shot.jpg', 'D:/visha/github/traffic-lights/coco.names', 'D:/visha/github/traffic-lights/yolov3.cfg', 'D:/visha/github/traffic-lights/yolov3.weights')
 
 priority_list_main = []
 while True:
     priority_list = []
-    cars_per_road = {"A":camera1.process_video()[0],"B":2,"C":3,"D":4}
-    ambulances_per_road = {"A":camera1.process_video()[1],"B":1,"C":0,"D":0}
+    cars_per_road = {"A":1,"B":5,"C":6,"D":3}
+    ambulances_per_road = {"A":camera1.process_video()[1],"B":0,"C":0,"D":0}
     
     #Sorting dictionaries
     sorted_cars_per_road = dict(sorted(cars_per_road.items(), key=lambda item: item[1], reverse=True))
@@ -120,4 +126,23 @@ while True:
         else:
             priority_list.append(i)    
     priority_list_main = priority_list
+    priority_list_main.append("N")
     print(priority_list)
+    i=0
+    while i < len(priority_list_main):
+        time.sleep(1)
+        st=bytes(priority_list_main[i],'utf-8')
+        BytesWritten=Serialobj.write(st)
+        print("bytes written",BytesWritten)
+        if(i==0):
+            time.sleep(25)
+        if(i==1):
+            time.sleep(18)
+        if(i==2):
+            time.sleep(12)
+        if(i==3):
+            time.sleep(5)
+        if(i==4):
+            time.sleep(10)
+
+        i=i+1
