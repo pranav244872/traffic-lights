@@ -34,3 +34,10 @@ Changed object_detector.py to take video input from local streaming url.
 ### Ver 1.3.0:  
 Wrote the logic for lane priority.  
 Automatically takes into consideration the number of vehicles, ambulances and allots priority in a list.(currently slow af)  
+
+### Ver 1.3.1:  
+Sent the priority lane list to arduino.  
+which has logic for traffic light timings.  
+changes the lights according to alloted time.  
+  
+## The project code is done
